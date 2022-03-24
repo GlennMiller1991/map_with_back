@@ -1,0 +1,79 @@
+{
+  "name": "map-svg",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "2gis-maps": "^3.7.1",
+    "@types/hull.js": "",
+    "classnames": "",
+    "hull.js": "",
+    "md5": "^2.3.0",
+    "mysql2": "^2.3.3",
+    "react": "",
+    "react-dom": "",
+    "react-fade-in": "",
+    "react-scripts": "",
+    "sqlite3": "^5.0.2",
+    "xlsx": ""
+  },
+  "devDependencies": {
+    "@types/cors": "",
+    "@types/express": "",
+    "@types/jsdom": "",
+    "@types/node": "",
+    "copy-webpack-plugin": "",
+    "cors": "",
+    "css-loader": "",
+    "dotenv": "",
+    "express": "",
+    "file-loader": "",
+    "mini-css-extract-plugin": "",
+    "npm-run-all": "",
+    "sass": "",
+    "sass-loader": "",
+    "style-loader": "",
+    "ts-loader": "",
+    "ts-node": "",
+    "typescript": "",
+    "typescript-plugin-css-modules": "",
+    "url-loader": "",
+    "webpack": "",
+    "webpack-cli": "",
+    "webpack-dev-server": ""
+  },
+  "scripts": {
+    "watchbacksrc": "tsc -w -p tsconfig.back.json",
+    "buildback": "npm-run-all -p buildbacksrc",
+    "watchfront": "npm-run-all -p watchfrontsrc",
+    "watchback": "npm-run-all -p watchbacksrc",
+    "watchserv": "webpack-dev-server",
+    "buildfrontsrc": "webpack",
+    "buildfront": "npm-run-all -p buildfrontsrc",
+    "watchfrontsrc": "webpack -w",
+    "server": "node dest/back/server/server.js",
+    "buildbacksrc": "tsc -p tsconfig.back.json",
+    "build": "npm-run-all -p buildback buildfront",
+    "watch": "npm-run-all -p watchback watchfront",
+    "open": "start http://localhost:8340",
+    "serveropen": "npm-run-all -p server open",
+    "startbuild": "npm-run-all build serveropen"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

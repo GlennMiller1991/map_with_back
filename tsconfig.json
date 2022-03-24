@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "sourceMap": true,
+    "outDir": "dest",
+    "rootDir": "src",
+    "target": "es6",
+    "lib": ["es6","dom"],
+    "jsx": "react", /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
+    "downlevelIteration": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": [
+        "node_modules/*",
+        "src/jscore/db/node_modules/*",
+        "src/jscore/func/node_modules/*",
+        "src/jscore/jssn/node_modules/*"
+      ]
+    }
+    /*
+    "strict": true, Enable all strict type-checking options. */
+  },
+  "exclude": ["node_modules", "src/front", "src/**/*.bro.test.ts"]
+}

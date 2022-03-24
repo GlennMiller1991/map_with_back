@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "sourceMap": true,
+    "outDir": "dest",
+    "rootDir": "src",
+    "target": "es6",
+    "lib": ["es6","dom"],
+    "jsx": "react",
+    "downlevelIteration": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": [
+        "node_modules/*",
+        "src/jscore/db/node_modules/*",
+        "src/jscore/func/node_modules/*",
+        "src/jscore/jssn/node_modules/*"
+      ]
+    },
+    /* "esModuleInterop": true, */
+    "resolveJsonModule": true
+  },
+  "exclude": ["node_modules", "src/front", "src/**/*.bro.test.ts"]
+}
