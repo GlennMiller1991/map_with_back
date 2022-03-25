@@ -16,6 +16,8 @@ import {
 import {dbStringToCoords} from './utils/dbStringToCoords'
 import {serverApi} from "./rest_api/serverApi";
 import {objectToSql} from "./utils/objectToSql";
+import {Simulate} from "react-dom/test-utils";
+import load = Simulate.load;
 
 export const fakeObject: objectType = {
     // empty coords array and id is
@@ -37,6 +39,9 @@ export const fakeObject: objectType = {
 function App() {
 
     //state
+    // hover while wait
+    const [pageLoader, setPageLoader] = useState(false)
+
     // error log for user
     const [appError, setAppError] = useState<string>('')
 
@@ -249,69 +254,51 @@ function App() {
             setAppError('Не удалось открыть базу данных')
         }
     }, [])
-    const getCountry = useCallback(async function (countryId: number) {
+    const loadDataDecorator = useCallback(async (callback: Function, args: Array<any> = [],
+                                                 timeout: number = NETWORK__TIMEOUT) => {
+        // wrapper around ajax request with timeout control and error handling
+        // pageloader is on
+        setPageLoader(true)
+
+        // create timeout controller
         let controller = new AbortController()
         let signal = controller.signal
 
+        // start timeout controller
         setTimeout(() => {
             controller.abort()
-        }, NETWORK__TIMEOUT)
+        }, timeout)
+
+        // try to execute callback
         try {
-            let response = await serverApi.getCountry(countryId, signal)
-            let country: TCountry = await response.json()
-            let coords = JSON.parse(country.coords)
-            dbStringToCoords(coords)
-            let object: objectType = {
-                ...fakeObject,
-                id: String(country.id),
-                //@ts-ignore
-                coords: coords,
-                name: country.name,
-                itIs: "polygon",
-            }
-            setObjectsSet([object])
+            await callback(...args, signal)
         } catch (err) {
             if (err.name === 'AbortError') setAppError('Время ожидания запроса превышено')
             else throw err
         }
+        setPageLoader(false)
     }, [])
-    const getRegions = useCallback(async () => {
-        let controller = new AbortController()
-        let signal = controller.signal
 
-        setTimeout(() => {
-            controller.abort()
-        }, NETWORK__TIMEOUT * 3)
-        try {
-            let response = await serverApi.getRegions(signal)
-            let regions = await response.json()
-            let objects = regions.map((region: TRegion) => {
-                let coords = JSON.parse(region.coords)
-                dbStringToCoords(coords)
-                let object: objectType = {
-                    ...fakeObject,
-                    id: String(region.regionId),
-                    coords,
-                    name: region.name,
-                    itIs: "polygon",
-                }
-                return object
-            })
-            setObjectsSet(objects)
-        } catch (err) {
-            if (err.name === 'AbortError') setAppError('Время ожидания запроса превышено')
-            else throw err
+    // cartweb database requests
+    const getCountry = useCallback(async function (countryId: number, signal: AbortSignal) {
+        let response = await serverApi.getCountry(countryId, signal)
+        let country: TCountry = await response.json()
+        let coords = JSON.parse(country.coords)
+        dbStringToCoords(coords)
+        let object: objectType = {
+            ...fakeObject,
+            id: String(country.id),
+            //@ts-ignore
+            coords: coords,
+            name: country.name,
+            itIs: "polygon",
         }
+        setObjectsSet([object])
     }, [])
-    const getRegion = useCallback(async (id: number) => {
-        let controller = new AbortController()
-        let signal = controller.signal
-        setTimeout(() => {
-            controller.abort()
-        }, NETWORK__TIMEOUT)
-        try {
-            let response = await serverApi.getRegion(id, signal)
-            let region: TRegion = await response.json()
+    const getRegions = useCallback(async (signal: AbortSignal) => {
+        let response = await serverApi.getRegions(signal)
+        let regions = await response.json()
+        let objects = regions.map((region: TRegion) => {
             let coords = JSON.parse(region.coords)
             dbStringToCoords(coords)
             let object: objectType = {
@@ -319,74 +306,64 @@ function App() {
                 id: String(region.regionId),
                 coords,
                 name: region.name,
-                itIs: 'polygon'
+                itIs: "polygon",
             }
-            setObjectsSet([object])
-        } catch (err) {
-            if (err.name === 'AbortError') setAppError('Время ожидания превышено')
-            else throw err
-        }
+            return object
+        })
+        setObjectsSet(objects)
     }, [])
-    const getRegionDistricts = useCallback(async (id: number) => {
-        let controller = new AbortController()
-        let signal = controller.signal
-
-        setTimeout(() => {
-            controller.abort()
-        }, NETWORK__TIMEOUT)
-        try {
-            let response = await serverApi.getRegionDistricts(id, signal)
-            let districts: TDistrict[] = await response.json()
-            let objects = districts
-                .filter((district) => !!district.coords)
-                .map((district) => {
-                    let coords = JSON.parse(district.coords)
-                    dbStringToCoords(coords)
-                    let object: objectType = {
-                        ...fakeObject,
-                        coords,
-                        id: String(district.id),
-                        name: district.name,
-                        itIs: 'polygon',
-                    }
-                    return object
-                })
-            setObjectsSet(
-                objects
-                    .filter((object) => typeof object.coords[0] !== 'number')
-            )
-        } catch (err) {
-            if (err.name === 'AbortError') setAppError('Время ожидания превышено')
-            else throw err
+    const getRegion = useCallback(async (id: number, signal: AbortSignal) => {
+        let response = await serverApi.getRegion(id, signal)
+        let region: TRegion = await response.json()
+        let coords = JSON.parse(region.coords)
+        dbStringToCoords(coords)
+        let object: objectType = {
+            ...fakeObject,
+            id: String(region.regionId),
+            coords,
+            name: region.name,
+            itIs: 'polygon'
         }
+        setObjectsSet([object])
     }, [])
-    const getMapObjects = useCallback(async () => {
-        let controller = new AbortController()
-        let signal = controller.signal
-
-        setTimeout(() => {
-            controller.abort()
-        }, NETWORK__TIMEOUT)
-        try {
-            let response = await serverApi.getMapObjects(signal)
-            let dbObjects: Array<TObject> = await response.json()
-            let objects = dbObjects.map((object) => {
-                return {
+    const getRegionDistricts = useCallback(async (id: number, signal: AbortSignal) => {
+        let response = await serverApi.getRegionDistricts(id, signal)
+        let districts: TDistrict[] = await response.json()
+        let objects = districts
+            .filter((district) => !!district.coords)
+            .map((district) => {
+                let coords = JSON.parse(district.coords)
+                dbStringToCoords(coords)
+                let object: objectType = {
                     ...fakeObject,
-                    id: object.id,
-                    name: object.name,
-                    address: object.address,
-                    coords: [object.latitude, object.longitude],
-                    entranceCoords: JSON.parse(object.entranceCoords),
-                    squareBorders: JSON.parse(object.squareCoords),
-                    itIs: object.itIs,
+                    coords,
+                    id: String(district.id),
+                    name: district.name,
+                    itIs: 'polygon',
                 }
+                return object
             })
-            setObjectsSet(objects)
-        } catch(err) {
-            if (err.name === 'AbortError') setAppError('превышено время ожидания')
-            else throw err
-        }
+        setObjectsSet(
+            objects
+                .filter((object) => typeof object.coords[0] !== 'number')
+        )
+    }, [])
+    const getMapObjects = useCallback(async (signal: AbortSignal) => {
+        let response = await serverApi.getMapObjects(signal)
+        let dbObjects: Array<TObject> = await response.json()
+        let objects = dbObjects.map((object) => {
+            return {
+                ...fakeObject,
+                id: object.id,
+                name: object.name,
+                address: object.address,
+                coords: [object.latitude, object.longitude],
+                entranceCoords: JSON.parse(object.entranceCoords),
+                squareBorders: JSON.parse(object.squareCoords),
+                itIs: object.itIs,
+            }
+        })
+        setObjectsSet(objects)
     }, [])
     // side effects
 
@@ -417,23 +394,23 @@ function App() {
                     <span className={'addSign'}>Load</span>
                 </button>
                 <button className={'addControl testCountry'}
-                        onClick={() => getCountry(190)}>
+                        onClick={() => loadDataDecorator(getCountry, [190])}>
                     <span className={'addSign'}>GetC</span>
                 </button>
                 <button className={'addControl testRegions'}
-                        onClick={() => getRegions()}>
+                        onClick={() => loadDataDecorator(getRegions, undefined, NETWORK__TIMEOUT * 2)}>
                     <span className={'addSign'}>GetRs</span>
                 </button>
                 <button className={'addControl testRegion'}
-                        onClick={() => getRegion(10)}>
+                        onClick={() => loadDataDecorator(getRegion, [10])}>
                     <span className={'addSign'}>GetR</span>
                 </button>
                 <button className={'addControl testDistricts'}
-                        onClick={() => getRegionDistricts(10)}>
+                        onClick={() => loadDataDecorator(getRegionDistricts, [10])}>
                     <span className={'addSign'}>GetD</span>
                 </button>
                 <button className={'addControl testObjects'}
-                        onClick={getMapObjects}>
+                        onClick={() => loadDataDecorator(getMapObjects)}>
                     <span className={'addSign'}>GetO</span>
                 </button>
                 {
@@ -462,6 +439,12 @@ function App() {
             {
                 appError &&
                 <ErrorMessage message={appError} removeMessage={setError}/>
+            }
+            {
+                pageLoader &&
+                <div className={'sheet'}>
+                    <div className={'pageLoader'}/>
+                </div>
             }
         </div>
     );
