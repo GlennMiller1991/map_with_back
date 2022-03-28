@@ -312,7 +312,6 @@ export const MapMain: React.FC<TMapMainProps> = React.memo(({setError, createObj
                             // let objectToMap = DG.polyline(obj.coords).addTo(map)
                             // currentObjectsOnMap.current.markers.push(objectToMap)
                         } else if (obj.itIs === 'polygon') {
-                            debugger
                             let objectToMap = DG.polygon(obj.coords).addTo(map)
                             currentObjectsOnMap.current.squares.push(objectToMap)
                         }
@@ -339,7 +338,12 @@ export const MapMain: React.FC<TMapMainProps> = React.memo(({setError, createObj
                     })
                     //@ts-ignore
                     // корректируем зум карты на основании актуальных координат
-                    map.flyToBounds(getBounds(props.objs))
+                    const f = () => {
+                        console.log('mooooove')
+                    }
+                    map.on('movestart', f)
+                    map.on('moveend', f)
+                    map.flyToBounds(getBounds(props.objs), {duration: .3})
                 }
             }
         }, [props.objs, map, setError, createObject, props.emitterMap, removeUnsavedObjectsFromMap])

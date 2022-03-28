@@ -63,10 +63,14 @@ export const EntranceManagement: React.FC<TEntranceManagementProps> = React.memo
                         <td>
                             <button onClick={() => {
                                 if (props.activeEntrance) {
-                                    props.updateObject({entranceCoords: [...props.entranceCoords, props.activeEntrance]})
+                                    props.updateObject({
+                                        entranceCoords: [...props.entranceCoords, props.activeEntrance],
+                                        activeEntrance: undefined,
+                                    })
                                     props.emitterSideBar.emit(EVENT__CREATE_ENTRANCE, props.activeEntrance)
                                 }
-                            }}>Добавить</button>
+                            }}>Добавить
+                            </button>
                         </td>
                     </tr>
                     {
@@ -75,7 +79,7 @@ export const EntranceManagement: React.FC<TEntranceManagementProps> = React.memo
                                 <tr key={key}
                                     onMouseLeave={() => onMouseLeaveEntranceCallback(String(entrance))}
                                     onMouseEnter={() => onMouseEnterEntranceCallback(String(entrance))}>
-                                    <td>{ key+1 }</td>
+                                    <td>{key + 1}</td>
                                     <td>
                                         {entrance[0].toFixed(7)}
                                     </td>
@@ -85,7 +89,8 @@ export const EntranceManagement: React.FC<TEntranceManagementProps> = React.memo
                                     <td>
                                         <button onClick={() => {
                                             props.emitterSideBar.emit(EVENT__DELETE_ENTRANCE, entrance)
-                                            props.updateObject({entranceCoords:
+                                            props.updateObject({
+                                                entranceCoords:
                                                     props.entranceCoords.filter((entrance, index) => {
                                                         return index !== key
                                                     })

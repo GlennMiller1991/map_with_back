@@ -15,9 +15,7 @@ import {
 
 import {dbStringToCoords} from './utils/dbStringToCoords'
 import {serverApi} from "./rest_api/serverApi";
-import {objectToSql} from "./utils/objectToSql";
-import {Simulate} from "react-dom/test-utils";
-import load = Simulate.load;
+import {objectToSql} from "./utils/objectToSql";;
 
 export const fakeObject: objectType = {
     // empty coords array and id is
@@ -254,8 +252,10 @@ function App() {
             setAppError('Не удалось открыть базу данных')
         }
     }, [])
-    const loadDataDecorator = useCallback(async (callback: Function, args: Array<any> = [],
-                                                 timeout: number = NETWORK__TIMEOUT) => {
+    const loadDataDecorator = useCallback(async (
+        callback: Function,
+        args: Array<any> = [],
+        timeout: number = NETWORK__TIMEOUT) => {
         // wrapper around ajax request with timeout control and error handling
         // pageloader is on
         setPageLoader(true)
